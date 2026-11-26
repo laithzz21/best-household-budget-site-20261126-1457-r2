@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>HomeLedger — the Ellis household budget</title>
+  <meta name="description" content="HomeLedger is a household budget planner: a monthly budget, every transaction, savings goals, bills and the calculators a family needs to stay on plan. It runs entirely offline, from its own files.">
+  <link rel="stylesheet" href="style.css">
+  <!-- The app is one module script; main.js renders pages into #app. -->
+  <script type="module" src="main.js"></script>
+</head>
+<body>
+  <!-- The header is the same on every page; the router marks the active link. -->
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="#/">HomeLedger</a>
+      <nav class="main-nav" aria-label="Sections">
+        <a data-nav="dashboard" href="#/">Dashboard</a>
+        <a data-nav="budget" href="#/budget">Budget</a>
+        <a data-nav="transactions" href="#/transactions">Transactions</a>
+        <a data-nav="goals" href="#/goals">Goals</a>
+        <a data-nav="tools" href="#/tools">Tools</a>
+        <a data-nav="guide" href="#/guide">Guide</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Pages render into #app; main.js fills it from the hash route. -->
+  <main id="app" class="wrap"></main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p><strong>HomeLedger</strong> — a household budget planner that runs entirely offline. Your figures are stored only in this browser, on this device.</p>
+      <p class="fine">Sample household: the Ellis family, November 2026. Edit any figure — the whole site recalculates. No account, no cloud, no ads.</p>
+    </div>
+  </footer>
+</body>
+</html>
