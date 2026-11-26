@@ -1,51 +1,78 @@
-// Formatting: every dollar amount and date on the site passes through
-// here, so "$1,450" always looks the same wherever it appears.
+// Money and date printing for the whole site. Every amount the user sees
+// goes through these helpers, which is why "$1,450" never shows up spelled
+// two different ways on two different pages.
 
-const USD = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 0,
-});
-
-const USD_CENTS = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
-
-function asNumber(amount) {
-  const value = Number(amount);
-  return Number.isFinite(value) ? value : 0;
+function buildCurrencyFormatter(fractionDigits) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  });
 }
 
-export function money(amount, withCents = false) {
-  const formatter = withCents ? USD_CENTS : USD;
-  return formatter.format(asNumber(amount));
+const wholeDollars = buildCurrencyFormatter(0);
+const withCents = buildCurrencyFormatter(2);
+
+function toSafeNumber(raw) {
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
-export function signedMoney(amount, withCents = false) {
-  const value = asNumber(amount);
-  const sign = value > 0 ? '+' : value < 0 ? '−' : '';
-  return `${sign}${money(Math.abs(value), withCents)}`;
+function pickFormatter(showCents) {
+  return showCents ? withCents : wholeDollars;
+}
+
+export function money(amount, showCents = false) {
+  return pickFormatter(showCents).format(toSafeNumber(amount));
+}
+
+export function signedMoney(amount, showCents = false) {
+  const value = toSafeNumber(amount);
+  let mark = "";
+  if (value > 0) mark = "+";
+  else if (value < 0) mark = "−";
+  return mark + pickFormatter(showCents).format(Math.abs(value));
 }
 
 export function percent(part, whole) {
-  if (!whole) return '0%';
-  return `${Math.round((asNumber(part) / asNumber(whole)) * 100)}%`;
+  const denominator = toSafeNumber(whole);
+  if (denominator === 0) return "0%";
+  const share = (toSafeNumber(part) / denominator) * 100;
+  return Math.round(share) + "%";
 }
 
-const MONTH_ABBREV = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTH_SHORT = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
 export function prettyDate(iso) {
-  const [year, month, day] = String(iso).split('-').map(Number);
-  const monthName = MONTH_ABBREV[(month || 1) - 1];
-  return `${monthName} ${day}`;
+  const pieces = String(iso).split("-");
+  const monthIndex = Number(pieces[1]) || 1;
+  const day = Number(pieces[2]);
+  const name = MONTH_SHORT[monthIndex - 1];
+  return name + " " + day;
 }
 
-const ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
-
 export function escapeHtml(text) {
-  return String(text).replace(/[&<>"]/g, (char) => ESCAPES[char]);
+  return String(text)
+    .split("&")
+    .join("&amp;")
+    .split("<")
+    .join("&lt;")
+    .split(">")
+    .join("&gt;")
+    .split('"')
+    .join("&quot;");
 }
